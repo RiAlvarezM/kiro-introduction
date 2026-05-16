@@ -1,0 +1,24 @@
+{
+  "physics": {
+    "gravity": 800,
+    "jumpVelocity": -300,
+    "maxFallSpeed": 500,
+    "unit": "px/s"
+  },
+  "walls": {
+    "speed": 120,
+    "gapSize": 140,
+    "spacing": 350,
+    "width": 60,
+    "unit": "px"
+  },
+  "player": {
+    "xPositionPercent": 0.2,
+    "hitboxRadiusFactor": 0.4
+  },
+  "canvas": {
+    "baseWidth": 800,
+    "baseHeight": 600,
+    "aspectRatio": "4:3"
+  }
+}
