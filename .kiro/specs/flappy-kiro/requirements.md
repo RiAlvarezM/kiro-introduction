@@ -73,12 +73,12 @@ Flappy Kiro es un juego retro/oldschool estilo side-scroller infinito que corre 
 
 #### Criterios de Aceptación
 
-1. WHEN la Hitbox rectangular de Flappy se superpone en al menos 1 píxel con la Hitbox rectangular de una Tubería (detección AABB), THE Motor_de_Juego SHALL activar el estado Game_Over
-2. WHEN el borde superior de la Hitbox de Flappy alcanza la coordenada y=0 del Canvas, THE Motor_de_Juego SHALL activar el estado Game_Over
-3. WHEN el borde inferior de la Hitbox de Flappy alcanza la coordenada y igual a la altura del Canvas, THE Motor_de_Juego SHALL activar el estado Game_Over
+1. WHEN la hitbox circular de Flappy (definida por su centro y radio) se superpone con la Hitbox rectangular de una Tubería (detección círculo-rectángulo), THE Motor_de_Juego SHALL activar el estado Game_Over
+2. WHEN el borde superior de la hitbox circular de Flappy (centro_y - radio) alcanza la coordenada y=0 del Canvas, THE Motor_de_Juego SHALL activar el estado Game_Over
+3. WHEN el borde inferior de la hitbox circular de Flappy (centro_y + radio) alcanza la coordenada y igual a la altura del Canvas, THE Motor_de_Juego SHALL activar el estado Game_Over
 4. WHEN se activa el estado Game_Over, THE Motor_de_Juego SHALL reproducir el sonido game_over.wav una única vez
 5. THE Motor_de_Juego SHALL evaluar las colisiones en cada frame del loop del juego
-6. THE Motor_de_Juego SHALL definir la Hitbox de Flappy como un rectángulo con dimensiones iguales o menores al tamaño del sprite ghosty.png, centrado en la posición del personaje
+6. THE Motor_de_Juego SHALL definir la hitbox de Flappy como un círculo con radio igual a min(ancho_sprite, alto_sprite) * 0.4, centrado en la posición del personaje, para una detección más precisa con la forma redondeada del fantasmita
 
 ### Requisito 5: Sistema de Audio
 
