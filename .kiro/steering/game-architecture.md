@@ -117,11 +117,11 @@ class GameEngine {
 ### Render Order (Back to Front)
 
 ```
-1. Background         → sky + city skyline
-2. PipeSystem         → green pipes with caps
-3. CloudSystem        → semi-transparent clouds
-4. Player             → ghosty sprite with rotation
-5. HUD                → score bar, overlays
+1. Background         → sky, hills, vegetation, canal water (Canal de Panamá parallax)
+2. PipeSystem         → container ships (stacked colored containers + hull)
+3. CloudSystem        → semi-transparent clouds (multi-layer parallax)
+4. Player             → ghosty sprite with velocity-based rotation
+5. HUD                → dark bottom bar (score/high), state overlays (pause/game over/inicio)
 ```
 
 ---
@@ -349,6 +349,58 @@ class StateManager {
 | Input: pause | ignored | pause | resume | ignored |
 | Audio | silent | active | muted | collision once |
 | Score display | high score only | current + high | current + high | final + high |
+
+### HUD & Overlay Rendering
+
+The HUD system renders state-dependent UI on top of the game scene:
+
+```javascript
+class HUD {
+  render(ctx, state, scoreSystem, canvasWidth, canvasHeight) {
+    // Always render: dark bottom bar with score
+    this._renderBottomBar(ctx, scoreSystem, canvasWidth, canvasHeight);
+
+    // State-specific overlays
+    switch (state) {
+      case 'inicio':
+        this._renderStartScreen(ctx, canvasWidth, canvasHeight, scoreSystem.highScore);
+        break;
+      case 'paused':
+        this._renderPauseOverlay(ctx, canvasWidth, canvasHeight);
+        break;
+      case 'game_over':
+        this._renderGameOverOverlay(ctx, canvasWidth, canvasHeight, scoreSystem);
+        break;
+    }
+  }
+}
+```
+
+**Bottom Bar (always visible during Playing/Paused/Game_Over):**
+- Height: 40px, Color: `rgba(0, 0, 0, 0.8)`
+- "Score: N" at bottom-left (14px monospace, white)
+- "High: N" at bottom-right (14px monospace, gold #FFD700)
+
+**Start Screen (Inicio):**
+- Title "FLAPPY KIRO" centered at 25% from top (36px, white, shadow)
+- Ghosty sprite centered at 45% (idle animation)
+- "Press SPACE or Click to Play" at 65% (16px, gold, blinking 800ms)
+- High score at 78% (14px, gray)
+
+**Pause Overlay:**
+- Semi-transparent overlay: `rgba(0, 0, 0, 0.5)` full canvas
+- "PAUSED" centered at 40% (32px, white, bold)
+- "Press P or Click to Resume" at 55% (14px, light gray)
+
+**Game Over Overlay:**
+- Semi-transparent overlay: `rgba(0, 0, 0, 0.6)` full canvas
+- "GAME OVER" at 30% (36px, red #FF4444, bold, shadow)
+- "Score: N" at 45% (20px, white)
+- "Best: N" at 53% (20px, gold)
+- "★ NEW RECORD! ★" at 63% (16px, gold, pulse animation) — only if new high score
+- "Press SPACE or Click to Restart" at 75% (14px, gray, blinking) — appears after 1s delay
+
+---
 
 ### Reset Protocol
 

@@ -1,0 +1,13 @@
+{
+  "name": "flappy-kiro",
+  "version": "1.0.0",
+  "description": "Flappy Kiro - Canal de Panamá Theme",
+  "private": true,
+  "scripts": {
+    "test": "vitest --run"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.1",
+    "fast-check": "^4.1.1"
+  }
+}

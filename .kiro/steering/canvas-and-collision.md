@@ -120,11 +120,11 @@ Render back-to-front in a fixed order:
 ```javascript
 render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  this.background.render(ctx);   // Layer 0: sky + city
-  this.pipeSystem.render(ctx);   // Layer 1: pipes
-  this.cloudSystem.render(ctx);  // Layer 2: clouds
-  this.player.render(ctx);       // Layer 3: ghosty
-  this.hud.render(ctx);          // Layer 4: score bar + overlays
+  this.background.render(ctx);   // Layer 0-3: sky, hills, vegetation, canal water
+  this.pipeSystem.render(ctx);   // Layer 4: container ships
+  this.cloudSystem.render(ctx);  // Layer 5: semi-transparent clouds
+  this.player.render(ctx);       // Layer 6: ghosty with rotation
+  this.hud.render(ctx);          // Layer 7-8: score bar + state overlays
 }
 ```
 
@@ -265,15 +265,15 @@ function circleRectCollision(cx, cy, radius, rx, ry, rw, rh) {
 
 ### Boundary Collision
 
-Used for ceiling and ground detection:
+Used for ceiling and ground detection. Returns a simple boolean (matching the implementation in `game.js`):
 
 ```javascript
-function checkBoundaryCollision(cy, radius, canvasHeight) {
-  const hitCeiling = (cy - radius) <= 0;
-  const hitGround = (cy + radius) >= canvasHeight;
-  return { hitCeiling, hitGround, any: hitCeiling || hitGround };
+function checkBoundaryCollision(circle, canvasHeight) {
+  return circle.cy - circle.radius <= 0 || circle.cy + circle.radius >= canvasHeight;
 }
 ```
+
+The function takes a circle object `{ cx, cy, radius }` and returns `true` if the player touches the ceiling (y=0) or the floor (y=canvasHeight).
 
 ### Broad Phase: Spatial Filtering
 
@@ -299,26 +299,22 @@ This reduces checks from all pipes to typically 0–2 pipes per frame.
 
 ```javascript
 checkCollisions() {
-  const player = this.player;
-  const cx = player.x + player.width / 2;
-  const cy = player.y + player.height / 2;
-  const radius = Math.min(player.width, player.height) * 0.4;
+  const circle = this.player.getCollisionCircle();
 
   // 1. Boundary check (O(1), always run)
-  if (checkBoundaryCollision(cy, radius, this.canvas.height).any) {
+  if (checkBoundaryCollision(circle, this.canvas.height)) {
     return true;
   }
 
   // 2. Broad phase: filter pipes near player X
   const candidates = getPipesNearPlayer(
-    this.pipeSystem.activePipes, cx, radius, GAME_CONFIG.WALLS.WIDTH
+    this.pipeSystem.activePipes, circle.cx, circle.radius, GAME_CONFIG.PIPE_WIDTH
   );
 
-  // 3. Narrow phase: circle-rect on candidates only
+  // 3. Narrow phase: circle-rect on each candidate's top and bottom rects
   for (const pipe of candidates) {
-    if (circleRectCollision(cx, cy, radius, pipe.x, pipe.y, pipe.width, pipe.height)) {
-      return true;
-    }
+    if (circleRectCollision(circle, pipe.topRect)) return true;
+    if (circleRectCollision(circle, pipe.bottomRect)) return true;
   }
 
   return false;

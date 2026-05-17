@@ -4,6 +4,130 @@ inclusion: auto
 
 # Visual Design Standards
 
+## Background: Canal de Panamá Parallax Scene
+
+### Layer Structure (back to front)
+
+The background is drawn programmatically using Canvas 2D — no image assets. Each layer scrolls at a different speed relative to the obstacle speed for depth.
+
+| Layer | Content | Color | Parallax Speed |
+|-------|---------|-------|----------------|
+| 0 | Sky (solid fill) | #87CEEB | Static (no scroll) |
+| 1 | Distant hills (cerros) | #006400 | 15% of pipe speed |
+| 2 | Tropical vegetation | #228B22 | 25% of pipe speed |
+| 3 | Canal water | #2E8B8B | 30% of pipe speed |
+
+### Drawing Hills (Cerros)
+
+Use sine waves or quadratic curves for organic hill shapes:
+
+```javascript
+renderHills(ctx, scrollX, canvasWidth, canvasHeight) {
+  ctx.fillStyle = GAME_CONFIG.HILLS_COLOR; // #006400
+  ctx.beginPath();
+  ctx.moveTo(0, canvasHeight);
+
+  const hillWidth = 200;
+  const hillHeight = 120;
+  const baseY = canvasHeight * 0.55;
+  const offset = scrollX * 0.15; // 15% parallax
+
+  for (let x = -hillWidth; x < canvasWidth + hillWidth; x += hillWidth / 2) {
+    const adjustedX = x + (offset % hillWidth);
+    const peakY = baseY - hillHeight * (0.5 + 0.5 * Math.sin(adjustedX * 0.01));
+    ctx.lineTo(adjustedX, peakY);
+  }
+
+  ctx.lineTo(canvasWidth, canvasHeight);
+  ctx.closePath();
+  ctx.fill();
+}
+```
+
+### Drawing Vegetation
+
+Smaller, more varied bumps in front of hills:
+
+```javascript
+renderVegetation(ctx, scrollX, canvasWidth, canvasHeight) {
+  ctx.fillStyle = GAME_CONFIG.VEGETATION_COLOR; // #228B22
+  ctx.beginPath();
+  ctx.moveTo(0, canvasHeight);
+
+  const baseY = canvasHeight * 0.65;
+  const offset = scrollX * 0.25; // 25% parallax
+
+  for (let x = 0; x <= canvasWidth; x += 20) {
+    const adjustedX = x + offset;
+    const y = baseY - 15 * Math.sin(adjustedX * 0.03) - 8 * Math.sin(adjustedX * 0.07);
+    ctx.lineTo(x, y);
+  }
+
+  ctx.lineTo(canvasWidth, canvasHeight);
+  ctx.closePath();
+  ctx.fill();
+}
+```
+
+### Drawing Canal Water
+
+Flat colored band at the bottom with subtle wave effect:
+
+```javascript
+renderWater(ctx, scrollX, canvasWidth, canvasHeight) {
+  const waterTop = canvasHeight * 0.75;
+  const offset = scrollX * 0.3; // 30% parallax
+
+  // Main water body
+  ctx.fillStyle = GAME_CONFIG.WATER_COLOR; // #2E8B8B
+  ctx.fillRect(0, waterTop, canvasWidth, canvasHeight - waterTop);
+
+  // Subtle wave highlights
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath();
+    const waveY = waterTop + 10 + i * 15;
+    for (let x = 0; x <= canvasWidth; x += 5) {
+      const y = waveY + 3 * Math.sin((x + offset + i * 50) * 0.02);
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+}
+```
+
+### Seamless Wrapping
+
+The background must tile seamlessly. Use modulo on the scroll offset:
+
+```javascript
+update(deltaTime, pipeSpeed) {
+  this._scrollX += pipeSpeed * GAME_CONFIG.BG_PARALLAX_FACTOR * deltaTime;
+  // Wrap to prevent floating point overflow on long sessions
+  if (this._scrollX > this._tileWidth) {
+    this._scrollX -= this._tileWidth;
+  }
+}
+```
+
+**Key:** The sine-based procedural shapes are inherently tileable because `sin()` is periodic. Choose frequencies that produce full cycles within the tile width.
+
+### Background Rules
+
+| Rule | Rationale |
+|------|-----------|
+| All layers drawn programmatically | No image assets needed, runs without server |
+| Each layer has its own parallax speed | Creates depth perception |
+| Use periodic functions (sin) for shapes | Ensures seamless wrapping |
+| Wrap scrollX with modulo | Prevents float overflow on long sessions |
+| Sky is static (no scroll) | Anchors the scene, reduces draw calls |
+| Draw hills before vegetation before water | Correct occlusion order |
+| Keep shapes simple (no bezier complexity) | Performance: redrawn every frame |
+
+---
+
 ## Sprite Rendering Patterns
 
 ### Image Loading and Caching

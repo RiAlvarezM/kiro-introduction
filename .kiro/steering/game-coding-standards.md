@@ -236,13 +236,39 @@ class ObjectPool {
 
 ### Constants (UPPER_SNAKE_CASE within GAME_CONFIG)
 
+The `GAME_CONFIG` object uses a **flat structure** (no nested sub-objects) for simplicity:
+
 ```javascript
 const GAME_CONFIG = {
-  PHYSICS: { GRAVITY: 800, JUMP_VELOCITY: -300 },
-  WALLS: { SPEED: 120, GAP_SIZE: 140, SPACING: 350 },
-  CANVAS: { WIDTH: 800, HEIGHT: 600 }
+  // Canvas
+  BASE_WIDTH: 800,
+  BASE_HEIGHT: 600,
+  ASPECT_RATIO: 4/3,
+
+  // Physics
+  GRAVITY: 980,              // px/s²
+  JUMP_IMPULSE: -300,        // px/s
+  TERMINAL_VELOCITY: 500,    // px/s
+  MAX_UP_VELOCITY: -300,     // px/s
+
+  // Obstacles
+  PIPE_WIDTH: 60,
+  BASE_SPEED: 150,           // px/s
+  BASE_GAP: 160,             // px
+  BASE_SPACING: 250,         // px
+  MIN_GAP: 100,
+  MIN_SPACING: 180,
+  MAX_SPEED_MULTIPLIER: 2.0,
+
+  // Player
+  PLAYER_X_PERCENT: 0.20,
+  HITBOX_RADIUS_FACTOR: 0.4,
+
+  // ... etc
 };
 ```
+
+**Note:** When steering files reference `GAME_CONFIG.PHYSICS.GRAVITY` or `GAME_CONFIG.OBSTACLES.BASE_SPEED` in pseudocode examples, the actual implementation uses the flat form: `GAME_CONFIG.GRAVITY`, `GAME_CONFIG.BASE_SPEED`, etc.
 
 ### Private Members
 
