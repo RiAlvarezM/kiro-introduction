@@ -2,19 +2,19 @@
 
 ## Introducción
 
-Flappy Kiro es un juego retro/oldschool estilo side-scroller infinito que corre en el navegador. El jugador controla a un fantasmita llamado "Flappy" que debe navegar a través de un número infinito de tuberías (pipes) que aparecen desde la parte superior e inferior de la pantalla. El fondo del juego presenta una caricatura de la Ciudad de Panamá. El estilo visual es dibujado a mano con una estética retro.
+Flappy Kiro es un juego retro/oldschool estilo side-scroller infinito que corre en el navegador. El jugador controla a un fantasmita llamado "Flappy" que debe navegar a través de un número infinito de barcos portacontenedores que aparecen desde la parte superior e inferior de la pantalla. El fondo del juego presenta una caricatura del área del Canal de Panamá con vegetación tropical, agua del canal y cerros. Los obstáculos tienen forma de portacontenedores con contenedores de colores apilados, inspirados en los barcos que transitan el Canal. El estilo visual es dibujado a mano con una estética retro.
 
 ## Glosario
 
 - **Motor_de_Juego**: El sistema principal que ejecuta el loop del juego, gestiona el estado y coordina todos los subsistemas
 - **Canvas**: El elemento HTML5 Canvas donde se renderiza el juego
 - **Flappy**: El personaje jugable, un fantasmita blanco representado por el sprite ghosty.png
-- **Tubería**: Obstáculo vertical que aparece desde arriba y abajo de la pantalla con un espacio (gap) entre ambas secciones
-- **Gap**: El espacio libre entre la tubería superior y la tubería inferior por donde Flappy debe pasar
+- **Portacontenedores**: Obstáculo vertical con forma de barco portacontenedores con contenedores de colores apilados, que aparece desde arriba y abajo de la pantalla con un espacio (gap) entre ambas secciones
+- **Gap**: El espacio libre entre el portacontenedores superior y el portacontenedores inferior por donde Flappy debe pasar
 - **Scroller**: El sistema que desplaza continuamente el escenario y los obstáculos de derecha a izquierda
 - **HUD**: La interfaz de usuario superpuesta que muestra el puntaje actual y el puntaje máximo
-- **Hitbox**: El área de colisión del personaje y de las tuberías utilizada para detectar impactos
-- **Game_Over**: El estado del juego cuando Flappy colisiona con una tubería o con los límites de la pantalla
+- **Hitbox**: El área de colisión del personaje y de los portacontenedores utilizada para detectar impactos
+- **Game_Over**: El estado del juego cuando Flappy colisiona con un portacontenedores o con los límites de la pantalla
 - **Pausa**: El estado del juego donde toda la simulación se congela temporalmente sin perder el progreso
 - **Velocidad_Terminal**: La velocidad máxima de caída que Flappy puede alcanzar debido a la resistencia del aire simulada
 - **Delta_Time**: El tiempo transcurrido entre el frame actual y el anterior, usado para normalizar el movimiento
@@ -52,28 +52,28 @@ Flappy Kiro es un juego retro/oldschool estilo side-scroller infinito que corre 
 
 ### Requisito 3: Generación de Obstáculos y Dificultad Progresiva
 
-**Historia de Usuario:** Como jugador, quiero que las tuberías aparezcan de forma continua con dificultad creciente, para tener un desafío que escale conforme mejoro.
+**Historia de Usuario:** Como jugador, quiero que los portacontenedores aparezcan de forma continua con dificultad creciente, para tener un desafío que escale conforme mejoro.
 
 #### Criterios de Aceptación
 
-1. THE Scroller SHALL generar pares de tuberías (superior e inferior) con una distancia horizontal inicial de 250 píxeles entre cada par
-2. THE Scroller SHALL posicionar cada par de tuberías con un Gap inicial de 160 píxeles de altura entre la tubería superior y la tubería inferior
-3. THE Scroller SHALL posicionar el centro vertical del Gap de forma aleatoria entre el 20% y el 80% de la altura del Canvas para cada par de tuberías
-4. THE Scroller SHALL desplazar las tuberías de derecha a izquierda a una velocidad base inicial de 150 píxeles/segundo (normalizada por delta time)
-5. WHEN una tubería sale completamente del lado izquierdo de la pantalla (su coordenada X más su ancho es menor a 0), THE Scroller SHALL eliminar esa tubería del arreglo de tuberías activas
-6. THE Scroller SHALL renderizar cada tubería con un ancho de 60 píxeles
-7. WHEN el puntaje del jugador se incrementa en 5 puntos, THE Motor_de_Juego SHALL aumentar la velocidad de desplazamiento de las tuberías en un 5%, hasta un máximo del 200% de la velocidad base inicial
+1. THE Scroller SHALL generar pares de portacontenedores (superior e inferior) con una distancia horizontal inicial de 250 píxeles entre cada par
+2. THE Scroller SHALL posicionar cada par de portacontenedores con un Gap inicial de 160 píxeles de altura entre el portacontenedores superior y el portacontenedores inferior
+3. THE Scroller SHALL posicionar el centro vertical del Gap de forma aleatoria entre el 20% y el 80% de la altura del Canvas para cada par de portacontenedores
+4. THE Scroller SHALL desplazar los portacontenedores de derecha a izquierda a una velocidad base inicial de 150 píxeles/segundo (normalizada por delta time)
+5. WHEN un portacontenedores sale completamente del lado izquierdo de la pantalla (su coordenada X más su ancho es menor a 0), THE Scroller SHALL eliminar ese portacontenedores del arreglo de obstáculos activos
+6. THE Scroller SHALL renderizar cada portacontenedores con un ancho de 60 píxeles
+7. WHEN el puntaje del jugador se incrementa en 5 puntos, THE Motor_de_Juego SHALL aumentar la velocidad de desplazamiento de los portacontenedores en un 5%, hasta un máximo del 200% de la velocidad base inicial
 8. WHEN el puntaje del jugador se incrementa en 10 puntos, THE Motor_de_Juego SHALL reducir el tamaño del Gap en 5 píxeles, hasta un mínimo de 100 píxeles
-9. WHEN el puntaje del jugador se incrementa en 10 puntos, THE Motor_de_Juego SHALL reducir la distancia horizontal entre pares de tuberías en 10 píxeles, hasta un mínimo de 180 píxeles
+9. WHEN el puntaje del jugador se incrementa en 10 puntos, THE Motor_de_Juego SHALL reducir la distancia horizontal entre pares de portacontenedores en 10 píxeles, hasta un mínimo de 180 píxeles
 10. THE Motor_de_Juego SHALL aplicar los incrementos de dificultad de forma gradual sin saltos bruscos perceptibles por el jugador
 
 ### Requisito 4: Detección de Colisiones
 
-**Historia de Usuario:** Como jugador, quiero que el juego detecte cuando Flappy choca con una tubería o sale de los límites, para que la partida termine de forma justa.
+**Historia de Usuario:** Como jugador, quiero que el juego detecte cuando Flappy choca con un portacontenedores o sale de los límites, para que la partida termine de forma justa.
 
 #### Criterios de Aceptación
 
-1. WHEN la hitbox circular de Flappy (definida por su centro y radio) se superpone con la Hitbox rectangular de una Tubería (detección círculo-rectángulo), THE Motor_de_Juego SHALL activar el estado Game_Over
+1. WHEN la hitbox circular de Flappy (definida por su centro y radio) se superpone con la Hitbox rectangular de un Portacontenedores (detección círculo-rectángulo), THE Motor_de_Juego SHALL activar el estado Game_Over
 2. WHEN el borde superior de la hitbox circular de Flappy (centro_y - radio) alcanza la coordenada y=0 del Canvas, THE Motor_de_Juego SHALL activar el estado Game_Over
 3. WHEN el borde inferior de la hitbox circular de Flappy (centro_y + radio) alcanza la coordenada y igual a la altura del Canvas, THE Motor_de_Juego SHALL activar el estado Game_Over
 4. WHEN se activa el estado Game_Over, THE Motor_de_Juego SHALL reproducir el sonido game_over.wav una única vez
@@ -87,7 +87,7 @@ Flappy Kiro es un juego retro/oldschool estilo side-scroller infinito que corre 
 #### Criterios de Aceptación
 
 1. WHEN el jugador ejecuta un salto (presiona Espacio o hace clic durante el estado Playing), THE Motor_de_Juego SHALL reproducir el sonido jump.wav inmediatamente
-2. WHEN se activa el estado Game_Over por colisión con una tubería o con los límites de la pantalla, THE Motor_de_Juego SHALL reproducir el sonido game_over.wav una única vez
+2. WHEN se activa el estado Game_Over por colisión con un portacontenedores o con los límites de la pantalla, THE Motor_de_Juego SHALL reproducir el sonido game_over.wav una única vez
 3. THE Motor_de_Juego SHALL permitir la reproducción simultánea de múltiples instancias de jump.wav si el jugador ejecuta saltos rápidos consecutivos
 4. THE Motor_de_Juego SHALL no reproducir ningún sonido mientras el juego se encuentra en estado Paused
 5. IF el navegador bloquea la reproducción de audio por políticas de autoplay, THEN THE Motor_de_Juego SHALL desbloquear el contexto de audio en la primera interacción del usuario y continuar el juego sin sonido hasta ese momento
@@ -99,8 +99,8 @@ Flappy Kiro es un juego retro/oldschool estilo side-scroller infinito que corre 
 
 #### Criterios de Aceptación
 
-1. WHEN el borde trasero de la Hitbox de Flappy sobrepasa el borde trasero del espacio entre un par de tuberías, THE Motor_de_Juego SHALL incrementar el puntaje actual en 1 punto, hasta un valor máximo de 9999
-2. THE HUD SHALL mostrar el puntaje actual en tiempo real en la parte inferior izquierda de la pantalla con el formato "Score: [número]", actualizándose inmediatamente al pasar cada tubería
+1. WHEN el borde trasero de la Hitbox de Flappy sobrepasa el borde trasero del espacio entre un par de portacontenedores, THE Motor_de_Juego SHALL incrementar el puntaje actual en 1 punto, hasta un valor máximo de 9999
+2. THE HUD SHALL mostrar el puntaje actual en tiempo real en la parte inferior izquierda de la pantalla con el formato "Score: [número]", actualizándose inmediatamente al pasar cada portacontenedores
 3. THE HUD SHALL mostrar el puntaje máximo histórico en la parte inferior derecha de la pantalla con el formato "High: [número]"
 4. WHEN el juego se inicia por primera vez o se reinicia tras un game over, THE Motor_de_Juego SHALL establecer el puntaje actual en 0 y cargar el puntaje máximo desde localStorage, usando 0 como valor por defecto si no existe un valor almacenado
 5. WHEN el puntaje actual supera el puntaje máximo almacenado, THE Motor_de_Juego SHALL actualizar el puntaje máximo en memoria, persistirlo en localStorage, y reflejar el nuevo valor en el HUD inmediatamente
@@ -115,41 +115,41 @@ Flappy Kiro es un juego retro/oldschool estilo side-scroller infinito que corre 
 
 1. THE Motor_de_Juego SHALL gestionar los siguientes estados: Inicio, Playing, Paused, Game_Over
 2. WHILE el juego se encuentra en estado Playing, WHEN el jugador presiona la tecla "P" o la tecla Escape, THE Motor_de_Juego SHALL transicionar al estado Paused
-3. WHILE el juego se encuentra en estado Paused, THE Motor_de_Juego SHALL congelar toda la simulación física, el desplazamiento de tuberías, el movimiento de nubes y el fondo, preservando las posiciones exactas de todos los elementos
+3. WHILE el juego se encuentra en estado Paused, THE Motor_de_Juego SHALL congelar toda la simulación física, el desplazamiento de portacontenedores, el movimiento de nubes y el fondo, preservando las posiciones exactas de todos los elementos
 4. WHILE el juego se encuentra en estado Paused, THE Motor_de_Juego SHALL mostrar un overlay semi-transparente con el texto "PAUSED" centrado en el Canvas y una instrucción para reanudar
 5. WHILE el juego se encuentra en estado Paused, WHEN el jugador presiona la tecla "P", Escape, o hace clic en la pantalla, THE Motor_de_Juego SHALL transicionar al estado Playing y reanudar la simulación desde el punto exacto donde se pausó
 6. WHILE el juego se encuentra en estado Paused, THE Motor_de_Juego SHALL ignorar las entradas de salto (Espacio/clic) para evitar saltos accidentales al reanudar
-7. WHEN se activa el estado Game_Over, THE Motor_de_Juego SHALL detener el desplazamiento del escenario y la generación de tuberías
+7. WHEN se activa el estado Game_Over, THE Motor_de_Juego SHALL detener el desplazamiento del escenario y la generación de portacontenedores
 8. WHEN se activa el estado Game_Over, THE Motor_de_Juego SHALL mostrar un mensaje de "Game Over" centrado en el Canvas junto con el puntaje final, el puntaje máximo, y una instrucción para reiniciar
 9. WHEN el jugador presiona la tecla Espacio o hace clic transcurrido al menos 1 segundo desde la activación del estado Game_Over, THE Motor_de_Juego SHALL reiniciar la partida con el puntaje actual en cero, la dificultad en su nivel inicial, preservando el puntaje máximo almacenado en localStorage
-10. WHEN se reinicia la partida, THE Motor_de_Juego SHALL reposicionar a Flappy en su posición inicial, restablecer su velocidad vertical a cero, eliminar todas las tuberías existentes, y restablecer todos los parámetros de dificultad a sus valores iniciales
+10. WHEN se reinicia la partida, THE Motor_de_Juego SHALL reposicionar a Flappy en su posición inicial, restablecer su velocidad vertical a cero, eliminar todos los portacontenedores existentes, y restablecer todos los parámetros de dificultad a sus valores iniciales
 11. IF el jugador presiona la tecla Espacio o hace clic antes de transcurrido 1 segundo desde la activación del estado Game_Over, THEN THE Motor_de_Juego SHALL ignorar la entrada y permanecer en el estado Game_Over
 12. WHILE el juego se encuentra en estado Paused o Game_Over, THE Motor_de_Juego SHALL continuar renderizando el último frame del juego como fondo estático detrás del overlay
 
-### Requisito 8: Fondo con Caricatura de la Ciudad de Panamá
+### Requisito 8: Fondo con Escena del Canal de Panamá
 
-**Historia de Usuario:** Como jugador, quiero ver un fondo con una caricatura de la Ciudad de Panamá, para tener una experiencia visual atractiva y temática.
+**Historia de Usuario:** Como jugador, quiero ver un fondo con una caricatura del área del Canal de Panamá, para tener una experiencia visual atractiva y temática que represente la zona canalera.
 
 #### Criterios de Aceptación
 
-1. THE Motor_de_Juego SHALL renderizar un fondo que represente una caricatura estilizada de la Ciudad de Panamá con edificios y el skyline característico, dibujado programáticamente usando la API Canvas 2D
+1. THE Motor_de_Juego SHALL renderizar un fondo que represente una caricatura estilizada del área del Canal de Panamá, incluyendo el agua del canal en tonos azul-verdoso, vegetación tropical en las orillas, cerros al fondo, y siluetas de barcos en tránsito, dibujado programáticamente usando la API Canvas 2D
 2. THE Motor_de_Juego SHALL dibujar el fondo utilizando un estilo visual retro y dibujado a mano consistente con la estética general del juego
-3. THE Scroller SHALL desplazar el fondo de derecha a izquierda a una velocidad equivalente al 30% de la velocidad de las tuberías para crear un efecto de paralaje (parallax)
+3. THE Scroller SHALL desplazar el fondo de derecha a izquierda a una velocidad equivalente al 30% de la velocidad de los portacontenedores para crear un efecto de paralaje (parallax)
 4. THE Motor_de_Juego SHALL renderizar el fondo como una imagen continua que se repite sin costuras visibles cuando el desplazamiento completa un ciclo
-5. THE Motor_de_Juego SHALL utilizar una paleta de colores con un cielo azul claro (#87CEEB) como color base del fondo
-6. THE Motor_de_Juego SHALL renderizar las capas en el siguiente orden de atrás hacia adelante: cielo, fondo de ciudad, tuberías, nubes decorativas, Flappy, HUD
+5. THE Motor_de_Juego SHALL utilizar una paleta de colores con un cielo tropical azul claro (#87CEEB) como color base, agua del canal en azul-verdoso (#2E8B8B), vegetación en verde tropical (#228B22), y cerros en verde oscuro (#006400)
+6. THE Motor_de_Juego SHALL renderizar las capas en el siguiente orden de atrás hacia adelante: cielo, cerros lejanos, vegetación, agua del canal, portacontenedores, nubes decorativas, Flappy, HUD
 
-### Requisito 9: Estilo Visual Anime
+### Requisito 9: Estilo Visual Temático del Canal
 
-**Historia de Usuario:** Como jugador, quiero que el juego tenga una estética anime con estilo limpio y colorido, para disfrutar de una experiencia visual atractiva y moderna.
+**Historia de Usuario:** Como jugador, quiero que el juego tenga una estética visual coherente con el tema del Canal de Panamá, con obstáculos que parezcan barcos portacontenedores, para disfrutar de una experiencia visual inmersiva.
 
 #### Criterios de Aceptación
 
-1. THE Motor_de_Juego SHALL renderizar las tuberías con un color de relleno verde, bordes de color más oscuro con un ancho mínimo de 2 píxeles, y un segmento de remate (cap) en el extremo abierto de cada tubería
-2. THE Motor_de_Juego SHALL renderizar al menos 3 elementos decorativos de tipo nubes en pantalla, dibujados con un estilo anime (bordes suaves, formas redondeadas y orgánicas) y con una opacidad entre 40% y 70% (semi-transparentes) para crear un efecto etéreo
-3. THE Motor_de_Juego SHALL desplazar las nubes decorativas a velocidades diferentes entre sí (variando entre el 10% y el 50% de la velocidad de las tuberías), de modo que las nubes más lejanas se muevan más lento y las más cercanas más rápido, creando un efecto de profundidad (parallax multicapa)
+1. THE Motor_de_Juego SHALL renderizar los portacontenedores con un casco de barco en color gris oscuro (#4A4A4A) en la base, y contenedores apilados en colores variados (rojo #CC3333, azul #3366CC, verde #33AA55, naranja #FF8C00) con bordes oscuros de 1 píxel entre cada contenedor, y un ancho total de 60 píxeles
+2. THE Motor_de_Juego SHALL renderizar al menos 3 elementos decorativos de tipo nubes en pantalla, dibujados con un estilo suave (bordes difusos, formas redondeadas y orgánicas) y con una opacidad entre 40% y 70% (semi-transparentes) para crear un efecto de cielo tropical
+3. THE Motor_de_Juego SHALL desplazar las nubes decorativas a velocidades diferentes entre sí (variando entre el 10% y el 50% de la velocidad de los portacontenedores), de modo que las nubes más lejanas se muevan más lento y las más cercanas más rápido, creando un efecto de profundidad (parallax multicapa)
 4. THE HUD SHALL mostrar la información de puntaje dentro de una barra opaca de color oscuro posicionada en la parte inferior de la pantalla, con una altura entre 30 y 60 píxeles
-5. THE Motor_de_Juego SHALL utilizar un estilo visual general tipo anime con líneas limpias, colores planos con gradientes suaves, y formas estilizadas para todos los elementos del juego (tuberías, nubes, fondo, HUD)
+5. THE Motor_de_Juego SHALL utilizar un estilo visual general retro con líneas limpias, colores planos con gradientes suaves, y formas estilizadas para todos los elementos del juego (portacontenedores, nubes, fondo del canal, HUD)
 6. THE Motor_de_Juego SHALL renderizar el juego en una resolución base de 800x600 píxeles con una proporción de aspecto de 4:3
 7. WHEN la ventana del navegador cambia de tamaño, THE Motor_de_Juego SHALL escalar el Canvas proporcionalmente manteniendo la proporción de aspecto 4:3 sin distorsionar los elementos visuales
 

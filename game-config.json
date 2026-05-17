@@ -20,5 +20,21 @@
     "baseWidth": 800,
     "baseHeight": 600,
     "aspectRatio": "4:3"
+  },
+  "theme": {
+    "name": "Canal de Panamá",
+    "background": {
+      "skyColor": "#87CEEB",
+      "hillsColor": "#006400",
+      "vegetationColor": "#228B22",
+      "waterColor": "#2E8B8B"
+    },
+    "obstacles": {
+      "type": "container-ships",
+      "hullColor": "#4A4A4A",
+      "containerColors": ["#CC3333", "#3366CC", "#33AA55", "#FF8C00"],
+      "containerBorderColor": "#333333",
+      "containerHeight": 15
+    }
   }
 }

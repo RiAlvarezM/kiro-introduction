@@ -2,242 +2,215 @@
 
 ## Overview
 
-Implement a Flappy Bird-style side-scroller game using HTML5 Canvas and vanilla JavaScript. The game features a ghost character ("Flappy") navigating through pipes with progressive difficulty, a Panama City cartoon background with parallax, anime/retro visual style, audio effects, and localStorage-based high score persistence. All code resides in a single `game.js` file with an `index.html` entry point, runnable directly in the browser without a server or bundler.
+Implement a Flappy Bird-style side-scroller game set in the Canal de Panamá, using HTML5 Canvas and vanilla JavaScript. The player controls a ghost character ("Flappy") navigating through container ship obstacles. The game features parallax backgrounds, progressive difficulty, audio effects, and localStorage-based high score persistence. All code resides in a single `game.js` file with an `index.html` entry point, runnable directly in the browser without a server or bundler.
 
 ## Tasks
 
-- [ ] 1. Set up project structure, HTML entry point, and core game engine
-  - [ ] 1.1 Create index.html with Canvas element and game.js script tag
-    - Set up HTML5 boilerplate with a full-viewport canvas element
-    - Include meta viewport tag for responsive scaling
-    - Link to game.js as a module or script
-    - _Requirements: 1.1, 9.6, 10.3, 10.4_
+- [x] 1. Set up project structure, configuration, and core interfaces
+  - [x] 1.1 Create index.html with Canvas element and game.js script tag
+    - Create the HTML5 entry point with a `<canvas>` element
+    - Link to `game.js` as a module script
+    - Include basic CSS for centering the canvas and removing margins
+    - _Requirements: 1.1, 10.3, 10.4_
 
-  - [ ] 1.2 Implement GAME_CONFIG constants and shared data types
-    - Define the GAME_CONFIG object with all constants from the design (physics, pipes, difficulty, performance, audio, canvas)
-    - Implement Rect and Circle interfaces/types
-    - Implement `circleRectCollision()` and `checkBoundaryCollision()` utility functions
-    - _Requirements: 2.1, 4.1, 4.2, 4.3, 4.6_
+  - [x] 1.2 Create game.js with GAME_CONFIG constants and shared types
+    - Define the `GAME_CONFIG` object with all constants from the design (physics, pipes, canvas, theme colors, difficulty, performance, audio)
+    - Include Canal de Panamá theme colors: sky #87CEEB, water #2E8B8B, vegetation #228B22, hills #006400
+    - Include container ship obstacle config: hull #4A4A4A, container colors [#CC3333, #3366CC, #33AA55, #FF8C00], border #333333, container height 15px, width 60px
+    - Implement `circleRectCollision(circle, rect)` and `checkBoundaryCollision(circle, canvasHeight)` utility functions
+    - _Requirements: 9.1, 9.5, 9.6, 4.1, 4.2, 4.3_
 
-  - [ ] 1.3 Implement StateManager with valid state transitions
-    - Create StateManager class with states: Inicio, Playing, Paused, Game_Over
-    - Implement `transition()` method enforcing valid transitions per the state diagram
-    - Track `stateEnteredAt` timestamp for time-gated transitions
+  - [x] 1.3 Implement StateManager class with valid state transitions
+    - Implement states: Inicio, Playing, Paused, Game_Over
+    - Enforce valid transitions per the state diagram in the design
+    - Track `stateEnteredAt` timestamp for time-gated transitions (Game Over restart delay)
     - _Requirements: 7.1_
 
-  - [ ] 1.4 Implement GameEngine skeleton with game loop
-    - Create GameEngine class with `init()`, `start()`, `reset()`, `loop()`, `update()`, `render()` methods
-    - Implement requestAnimationFrame-based game loop with delta time calculation
-    - Clamp deltaTime to max 1/30s to handle inactive tabs
-    - Skip frames with deltaTime <= 0
-    - _Requirements: 10.1, 10.2_
-
-- [ ] 2. Implement player physics and input handling
-  - [ ] 2.1 Implement Player class with gravity, jump, and velocity clamping
-    - Create Player class with position, velocity, sprite properties
-    - Implement `applyGravity(deltaTime)` with 980 px/s² acceleration
-    - Implement `jump()` setting velocity to -300 px/s regardless of current velocity
-    - Clamp velocity to [-300, 500] px/s range
-    - Implement `update(deltaTime)` updating position with `y += velocity * deltaTime`
+- [ ] 2. Implement Player physics and InputHandler
+  - [~] 2.1 Implement Player class with gravity, jump, and velocity clamping
+    - Apply gravity of 980 px/s² normalized by delta time
+    - Jump sets velocity to -300 px/s regardless of current velocity
+    - Clamp velocity to [-300, 500] range (max ascent / terminal velocity)
+    - Update position using `y += velocity * deltaTime`
     - Keep player at fixed horizontal position (20% of canvas width)
+    - Implement `getCollisionCircle()` returning center and radius (min(w,h) * 0.4)
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.6, 2.7, 2.8_
 
-  - [ ]* 2.2 Write property tests for physics (Properties 1-3)
-    - **Property 1: Physics Update Correctness** - verify velocity = v + 980*dt (clamped) and position = y + newVelocity*dt
-    - **Property 2: Jump Impulse Override** - verify jump always sets velocity to -300 regardless of previous value
-    - **Property 3: Velocity Bounds Invariant** - verify velocity always in [-300, 500] for any sequence of updates/jumps
-    - **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.6, 2.8**
+  - [ ]* 2.2 Write property tests for physics (Properties 1-5)
+    - **Property 1: Physics Update Correctness** — verify velocity = v + 980*dt (clamped) and position = y + newVelocity*dt
+    - **Property 2: Jump Impulse Override** — verify jump always sets velocity to -300
+    - **Property 3: Velocity Bounds Invariant** — verify velocity stays in [-300, 500] for any sequence of updates/jumps
+    - **Property 4: Linear Interpolation Correctness** — verify lerp(a, b, alpha) is always between min(a,b) and max(a,b)
+    - **Property 5: Player Horizontal Position Invariant** — verify x always equals 20% of canvas width
+    - **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8**
 
-  - [ ] 2.3 Implement InputHandler class for keyboard and mouse events
-    - Bind Space key and click for jump/start/restart
-    - Bind P and Escape keys for pause/resume
-    - Implement `bind()` and `unbind()` methods
-    - Route inputs to appropriate callbacks based on current game state
+  - [~] 2.3 Implement InputHandler class for keyboard and mouse events
+    - Listen for Space/Click for jump and game start/restart
+    - Listen for P/Escape for pause/resume
+    - Expose callbacks: onJump, onPause, onResume, onRestart
+    - Bind to canvas element for click events
     - _Requirements: 1.3, 7.2, 7.5, 7.9_
 
-  - [ ]* 2.4 Write property tests for player position and interpolation (Properties 4-5)
-    - **Property 4: Linear Interpolation Correctness** - verify lerp(a, b, alpha) = a + (b-a)*alpha and result is between min(a,b) and max(a,b)
-    - **Property 5: Player Horizontal Position Invariant** - verify player X always equals 20% of canvas width
-    - **Validates: Requirements 2.5, 2.7**
+- [ ] 3. Implement PipeSystem (Container Ship obstacles) and DifficultySystem
+  - [~] 3.1 Implement ObjectPool and PipePool classes
+    - Create generic ObjectPool with acquire/release/prewarm methods
+    - Create PipePool extending ObjectPool with spawn() method for configuring recycled pipes
+    - Pre-warm with 10 pipe objects at initialization
+    - _Requirements: 10.1 (performance)_
 
-- [ ] 3. Implement pipe system with object pooling and difficulty scaling
-  - [ ] 3.1 Implement ObjectPool and PipePool classes
-    - Create generic ObjectPool with `acquire()`, `release()`, `prewarm()` methods
-    - Create PipePool extending ObjectPool with `spawn()` method for pipe configuration
-    - Pre-warm pool with 10 pipe objects at initialization
-    - _Requirements: 3.1, 3.5_
-
-  - [ ] 3.2 Implement PipeSystem for pipe generation, movement, and cleanup
-    - Create PipeSystem class managing active pipes array
+  - [~] 3.2 Implement PipeSystem with generation, movement, and cleanup
     - Generate pipe pairs with gap center between 20%-80% of canvas height
-    - Set pipe width to 60px, initial gap to 160px, initial spacing to 250px
     - Move pipes left at current speed * deltaTime
-    - Remove pipes when fully off-screen (x + width < 0) by releasing to pool
-    - Implement `checkScore()` to detect when player passes a pipe
+    - Remove (release to pool) pipes that exit left edge (x + width < 0)
+    - Track scoring: detect when player passes a pipe pair
+    - Initial spacing of 250px between pairs, gap of 160px, speed of 150 px/s
+    - Pipe width fixed at 60px
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-  - [ ]* 3.3 Write property tests for pipes (Properties 7-8)
-    - **Property 7: Pipe Gap Center Range** - verify gap center is between 20% and 80% of canvas height
-    - **Property 8: Pipe Movement and Cleanup** - verify pipes move by speed*dt and are removed when off-screen
-    - **Validates: Requirements 3.3, 3.4, 3.5**
-
-  - [ ] 3.4 Implement DifficultySystem with progressive scaling
-    - Create DifficultySystem class calculating speed, gap, and spacing based on score
-    - Speed: min(150 * (1 + floor(score/5) * 0.05), 300) px/s
-    - Gap: max(160 - floor(score/10) * 5, 100) px
-    - Spacing: max(250 - floor(score/10) * 10, 180) px
-    - Implement `reset()` to restore base values
+  - [~] 3.3 Implement DifficultySystem with progressive scaling
+    - Every 5 points: increase speed by 5% (max 200% of base = 300 px/s)
+    - Every 10 points: reduce gap by 5px (min 100px)
+    - Every 10 points: reduce spacing by 10px (min 180px)
+    - Apply changes gradually without perceptible jumps
     - _Requirements: 3.7, 3.8, 3.9, 3.10_
 
-  - [ ]* 3.5 Write property test for difficulty scaling (Property 6)
-    - **Property 6: Difficulty Scaling Correctness** - verify speed/gap/spacing formulas and bounds for any score 0-9999
-    - **Validates: Requirements 3.7, 3.8, 3.9**
+  - [ ]* 3.4 Write property tests for pipes and difficulty (Properties 6-8)
+    - **Property 6: Difficulty Scaling Correctness** — verify speed, gap, spacing formulas for any score 0-9999
+    - **Property 7: Pipe Gap Center Range** — verify gap center always between 20%-80% of canvas height
+    - **Property 8: Pipe Movement and Cleanup** — verify pipes move by speed*dt and are removed when off-screen
+    - **Validates: Requirements 3.3, 3.4, 3.5, 3.7, 3.8, 3.9**
 
-- [ ] 4. Checkpoint - Ensure all tests pass
+- [~] 4. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 5. Implement collision detection and scoring
-  - [ ] 5.1 Implement collision detection (circle-rect and boundary)
-    - Implement `circleRectCollision()` using nearest-point-on-rect algorithm
-    - Implement `checkBoundaryCollision()` for ceiling (cy - r <= 0) and ground (cy + r >= canvasHeight)
-    - Define player hitbox as circle with radius = min(width, height) * 0.4
-    - Integrate collision checks into game loop, triggering Game_Over on collision
+  - [~] 5.1 Implement collision detection in GameEngine
+    - Use `circleRectCollision` for player circle vs pipe rectangles (top and bottom)
+    - Use `checkBoundaryCollision` for ceiling (y=0) and floor (y=canvasHeight) checks
+    - Evaluate collisions every frame
+    - Trigger Game_Over state on any collision
     - _Requirements: 4.1, 4.2, 4.3, 4.5, 4.6_
 
   - [ ]* 5.2 Write property tests for collision detection (Properties 9-10)
-    - **Property 9: Circle-Rectangle Collision Detection** - verify collision iff distance from center to nearest rect point <= radius
-    - **Property 10: Boundary Collision Detection** - verify ceiling collision iff cy-r<=0, ground collision iff cy+r>=canvasHeight
+    - **Property 9: Circle-Rectangle Collision Detection** — verify collision iff distance from circle center to nearest rect point <= radius
+    - **Property 10: Boundary Collision Detection** — verify ceiling collision iff cy-r<=0, floor collision iff cy+r>=canvasHeight
     - **Validates: Requirements 4.1, 4.2, 4.3**
 
-  - [ ] 5.3 Implement ScoreSystem with localStorage persistence
-    - Create ScoreSystem class with `increment()`, `reset()`, `loadHighScore()`, `saveHighScore()`
-    - Cap score at 9999
-    - Load high score from localStorage with validation (integer 0-9999), default to 0
-    - Save high score on new record, wrap in try/catch for unavailable localStorage
+  - [~] 5.3 Implement ScoreSystem with localStorage persistence
+    - Increment score when player passes a pipe pair (max 9999)
+    - Load high score from localStorage on init (default 0 if invalid)
+    - Save high score when current score exceeds it
+    - Validate stored values: must be integer in [0, 9999]
+    - Handle localStorage unavailability gracefully
     - _Requirements: 6.1, 6.4, 6.5, 6.6_
 
-  - [ ]* 5.4 Write property tests for scoring (Properties 11-12)
-    - **Property 11: Score Increment and Cap** - verify increment produces min(score+1, 9999) and never exceeds 9999
-    - **Property 12: High Score Persistence Round-Trip** - verify save/load round-trip and invalid data handling
+  - [ ]* 5.4 Write property tests for score system (Properties 11-12)
+    - **Property 11: Score Increment and Cap** — verify increment produces min(score+1, 9999)
+    - **Property 12: High Score Persistence Round-Trip** — verify save/load round-trip for valid values, default 0 for invalid
     - **Validates: Requirements 6.1, 6.4, 6.5, 6.6**
 
 - [ ] 6. Implement game state management (pause, game over, restart)
-  - [ ] 6.1 Implement pause functionality with state freeze
-    - Freeze all physics, pipe movement, clouds, and background when Paused
-    - Ignore jump inputs during Paused state (only P/Escape/click to resume)
-    - Resume from exact frozen state
-    - _Requirements: 7.2, 7.3, 7.5, 7.6, 7.12_
+  - [~] 6.1 Implement pause/resume logic in GameEngine
+    - Freeze all simulation (physics, pipes, clouds, background) when Paused
+    - Preserve exact positions of all elements
+    - Ignore jump inputs (Space/Click) while paused
+    - Resume from exact state on P/Escape/Click
+    - _Requirements: 7.2, 7.3, 7.4, 7.5, 7.6_
 
-  - [ ] 6.2 Implement Game Over state with time-gated restart
-    - Stop scrolling and pipe generation on Game_Over
+  - [~] 6.2 Implement Game Over and restart logic
+    - Stop scrolling and pipe generation on Game Over
     - Enforce 1-second delay before accepting restart input
-    - On restart: reset score to 0, player to initial position, velocity to 0, clear pipes, reset difficulty, preserve high score
-    - _Requirements: 7.7, 7.9, 7.10, 7.11_
+    - On restart: reset score to 0, velocity to 0, reposition player, clear all pipes, reset difficulty to base values, preserve high score
+    - _Requirements: 7.7, 7.8, 7.9, 7.10, 7.11, 7.12_
 
   - [ ]* 6.3 Write property tests for state management (Properties 13-16)
-    - **Property 13: State Freeze in Non-Playing States** - verify no position/velocity changes during Paused or Game_Over updates
-    - **Property 14: Pause/Resume Round-Trip** - verify exact state preservation through pause/resume cycle
-    - **Property 15: Game Over Time Gate** - verify restart ignored before 1s, accepted after 1s
-    - **Property 16: Reset Completeness** - verify all values return to initial state after reset
+    - **Property 13: State Freeze in Non-Playing States** — verify no position/velocity changes during Paused or Game_Over updates
+    - **Property 14: Pause/Resume Round-Trip** — verify Playing→Paused→Playing preserves all state exactly
+    - **Property 15: Game Over Time Gate** — verify restart ignored before 1000ms, accepted after
+    - **Property 16: Reset Completeness** — verify reset produces initial config (score=0, velocity=0, no pipes, base difficulty, high score preserved)
     - **Validates: Requirements 7.3, 7.5, 7.6, 7.7, 7.9, 7.10, 7.11**
 
-- [ ] 7. Checkpoint - Ensure all tests pass
+- [~] 7. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 8. Implement rendering system (background, pipes, clouds, player, HUD)
-  - [ ] 8.1 Implement Background class with Panama City skyline and parallax
-    - Draw programmatic Panama City cartoon skyline using Canvas 2D API
-    - Use sky color #87CEEB as base
-    - Scroll at 30% of pipe speed (parallax)
-    - Implement seamless wrapping (scrollX modulo background width)
-    - Retro/hand-drawn visual style
+- [ ] 8. Implement AudioSystem
+  - [~] 8.1 Implement AudioSystem with preloading and playback
+    - Preload jump.wav and game_over.wav using Web Audio API (AudioContext + AudioBuffer)
+    - Play jump.wav on each jump (allow simultaneous instances for rapid jumps)
+    - Play game_over.wav once on Game Over
+    - No sound during Paused state
+    - Handle AudioContext autoplay policy: unlock on first user interaction
+    - Implement 10-second timeout for asset loading with error message on failure
+    - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 1.5, 1.6_
+
+- [ ] 9. Implement rendering system (Background, Clouds, Pipes, HUD)
+  - [~] 9.1 Implement Background class with Canal de Panamá parallax scene
+    - Render layers in order: sky (#87CEEB), hills (#006400), vegetation (#228B22), water (#2E8B8B)
+    - Scroll at 30% of pipe speed for parallax effect
+    - Seamless wrapping when scroll completes a cycle
+    - Retro hand-drawn style with clean lines and flat colors with subtle gradients
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
 
-  - [ ]* 8.2 Write property test for background parallax (Property 17)
-    - **Property 17: Background Parallax and Wrapping** - verify scroll speed is 30% of pipe speed and wrapping produces valid offset
-    - **Validates: Requirements 8.3, 8.4**
-
-  - [ ] 8.3 Implement CloudSystem with multi-layer parallax
-    - Create CloudSystem maintaining at least 3 clouds
-    - Each cloud has opacity in [0.4, 0.7] and speed factor in [0.1, 0.5] relative to pipe speed
-    - Ensure varied speed factors for depth effect
-    - Draw clouds with soft edges and rounded organic shapes (anime style)
-    - Recycle clouds that exit screen
+  - [~] 9.2 Implement CloudSystem with multi-layer parallax
+    - Render at least 3 clouds with soft edges and organic shapes
+    - Each cloud has different speed (10%-50% of pipe speed) for depth effect
+    - Opacity between 40%-70% (semi-transparent)
+    - Recycle clouds that exit left edge
     - _Requirements: 9.2, 9.3_
 
-  - [ ]* 8.4 Write property test for cloud system (Property 18)
-    - **Property 18: Cloud System Invariants** - verify min 3 clouds, opacity in [0.4, 0.7], speed in [0.1, 0.5], varied speeds
-    - **Validates: Requirements 9.2, 9.3**
+  - [~] 9.3 Implement container ship rendering with BatchRenderer
+    - Render container ships with dark gray hull (#4A4A4A) at the base
+    - Stack colored containers (red #CC3333, blue #3366CC, green #33AA55, orange #FF8C00) with 15px height each
+    - Draw dark borders (#333333) of 1px between containers
+    - Total width 60px per obstacle
+    - Pre-render ship segments on OffscreenCanvas for performance
+    - Use BatchRenderer to group draw calls by style
+    - _Requirements: 9.1, 9.5_
 
-  - [ ] 8.5 Implement pipe rendering with anime style
-    - Render pipes with green fill, darker border (min 2px), and cap segment at open end
-    - Use BatchRenderer with pre-rendered offscreen canvas for pipe segments
-    - _Requirements: 9.1_
-
-  - [ ] 8.6 Implement HUD rendering (score, high score, game state overlays)
-    - Render dark opaque bar (30-60px height) at bottom of screen
-    - Display "Score: X" on bottom-left, "High: X" on bottom-right
-    - Show game state overlays: title screen, "PAUSED" overlay, Game Over screen with scores and restart instruction
+  - [~] 9.4 Implement HUD rendering with score display and state overlays
+    - Dark opaque bar (30-60px height) at bottom of screen
+    - "Score: [number]" at bottom-left, "High: [number]" at bottom-right
+    - Show game state (Playing, Paused, Game Over) visibly
+    - Pause overlay: semi-transparent with "PAUSED" text centered
+    - Game Over overlay: "Game Over" with final score, high score, and restart instruction
+    - Start screen: "Flappy Kiro" title centered with "Press Space or Click to start"
     - _Requirements: 6.2, 6.3, 6.7, 7.4, 7.8, 1.2_
 
-  - [ ] 8.7 Implement render layer ordering and canvas scaling
-    - Render in order: sky → city background → pipes → clouds → Flappy → HUD
-    - Implement 4:3 aspect ratio scaling on window resize
-    - Base resolution 800x600, scale proportionally without distortion
-    - _Requirements: 8.6, 9.6, 9.7_
+  - [ ]* 9.5 Write property tests for background and clouds (Properties 17-18)
+    - **Property 17: Background Parallax and Wrapping** — verify scroll at 30% of pipe speed and seamless wrapping (scrollX mod width in valid range)
+    - **Property 18: Cloud System Invariants** — verify ≥3 clouds, opacity in [0.4, 0.7], speed factor in [0.1, 0.5], not all same speed
+    - **Validates: Requirements 8.3, 8.4, 9.2, 9.3**
 
-  - [ ]* 8.8 Write property test for canvas scaling (Property 19)
-    - **Property 19: Canvas Aspect Ratio Scaling** - verify 4:3 ratio maintained and canvas fits within window
+- [ ] 10. Implement canvas scaling and responsive layout
+  - [~] 10.1 Implement canvas aspect ratio scaling (4:3)
+    - Base resolution 800x600
+    - Scale proportionally on window resize without distortion
+    - Maintain 4:3 aspect ratio within available window space
+    - _Requirements: 9.6, 9.7_
+
+  - [ ]* 10.2 Write property test for canvas scaling (Property 19)
+    - **Property 19: Canvas Aspect Ratio Scaling** — verify scaled dimensions maintain 4:3 ratio and fit within window
     - **Validates: Requirements 9.7**
 
-- [ ] 9. Implement audio system and asset loading
-  - [ ] 9.1 Implement AudioSystem with preloading and autoplay handling
-    - Create AudioSystem using Web Audio API (AudioContext + AudioBuffer)
-    - Preload jump.wav and game_over.wav during initialization
-    - Implement `unlock()` to resume AudioContext on first user interaction
-    - Allow concurrent playback of jump sounds
-    - Silence audio during Paused state
-    - Wrap all playback in try/catch for graceful failure
-    - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6_
+- [ ] 11. Wire GameEngine together and implement game loop
+  - [~] 11.1 Implement GameEngine class orchestrating all subsystems
+    - Initialize all subsystems (Player, PipeSystem, Background, CloudSystem, HUD, AudioSystem, InputHandler, DifficultySystem, StateManager, ScoreSystem)
+    - Load sprite (ghosty.png) and audio assets with 10-second timeout
+    - Show error message on canvas if assets fail to load
+    - Implement main game loop: Input → Update → Render using requestAnimationFrame
+    - Normalize all movement with delta time; clamp deltaTime to max 1/30s for tab-inactive scenarios
+    - Wire input callbacks to state transitions and player actions
+    - Implement render order: sky → hills → vegetation → water → pipes → clouds → Flappy → HUD
+    - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 10.1, 10.2, 8.6_
 
-  - [ ] 9.2 Implement asset loading with timeout and error handling
-    - Load ghosty.png sprite and audio files with Promise.race against 10s timeout
-    - Show error message on canvas if any asset fails to load
-    - Only show start screen after all assets loaded successfully
-    - _Requirements: 1.4, 1.5, 1.6_
+  - [ ]* 11.2 Write unit tests for GameEngine initialization and state transitions
+    - Test start screen shows title and instruction text
+    - Test state transitions follow valid paths
+    - Test asset loading timeout triggers error message
+    - Test render layer order
+    - _Requirements: 1.2, 1.6, 7.1, 8.6_
 
-- [ ] 10. Implement performance optimizations (BatchRenderer, object pooling, PerformanceMonitor)
-  - [ ] 10.1 Implement BatchRenderer with offscreen canvas pre-rendering
-    - Create BatchRenderer class grouping draw calls by context state
-    - Pre-render pipe segments and clouds on offscreen canvases
-    - Minimize fillStyle/strokeStyle changes and save/restore calls
-    - _Requirements: 10.1_
-
-  - [ ] 10.2 Implement PerformanceMonitor for FPS tracking
-    - Create PerformanceMonitor with ring buffer of last 60 frame times
-    - Calculate rolling FPS average
-    - Detect performance degradation (FPS < 45 for 10+ frames)
-    - _Requirements: 10.1_
-
-- [ ] 11. Wire all systems together and integration
-  - [ ] 11.1 Wire GameEngine to orchestrate all subsystems
-    - Connect GameEngine.init() to load assets and initialize all subsystems
-    - Wire game loop: Input → State check → Update (physics, pipes, difficulty, clouds, background) → Collision → Render
-    - Connect InputHandler callbacks to appropriate state transitions and player actions
-    - Connect ScoreSystem to PipeSystem score detection
-    - Connect DifficultySystem to PipeSystem speed/gap/spacing
-    - Connect AudioSystem to jump and game over events
-    - _Requirements: 1.1, 1.3, 10.1, 10.2, 10.3, 10.4_
-
-  - [ ]* 11.2 Write unit tests for integration scenarios
-    - Test full game initialization flow
-    - Test state transitions (Inicio → Playing → Paused → Playing → Game_Over → Playing)
-    - Test score increment on pipe pass
-    - Test difficulty update on score change
-    - Test audio triggers on jump and game over
-    - _Requirements: 1.3, 6.1, 7.1, 5.1, 5.2_
-
-- [ ] 12. Final checkpoint - Ensure all tests pass
+- [~] 12. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
@@ -247,9 +220,10 @@ Implement a Flappy Bird-style side-scroller game using HTML5 Canvas and vanilla 
 - Checkpoints ensure incremental validation
 - Property tests validate universal correctness properties from the design document
 - Unit tests validate specific examples and edge cases
-- All code goes in a single `game.js` file with `index.html` as entry point
-- Testing uses Vitest + fast-check (installed as dev dependencies, not bundled with the game)
-- The game itself has zero external dependencies and runs by opening index.html directly
+- All code is vanilla JavaScript (no frameworks/bundlers) in a single game.js file
+- The game must run by opening index.html directly in the browser
+- Container ship obstacles use the Canal de Panamá theme with stacked colored containers and dark gray hulls
+- Testing uses Vitest + fast-check as specified in the design
 
 ## Task Dependency Graph
 
@@ -257,16 +231,17 @@ Implement a Flappy Bird-style side-scroller game using HTML5 Canvas and vanilla 
 {
   "waves": [
     { "id": 0, "tasks": ["1.1", "1.2"] },
-    { "id": 1, "tasks": ["1.3", "1.4"] },
-    { "id": 2, "tasks": ["2.1", "2.3", "3.1"] },
-    { "id": 3, "tasks": ["2.2", "2.4", "3.2", "3.4"] },
-    { "id": 4, "tasks": ["3.3", "3.5", "5.1", "5.3"] },
-    { "id": 5, "tasks": ["5.2", "5.4", "6.1", "6.2"] },
-    { "id": 6, "tasks": ["6.3"] },
-    { "id": 7, "tasks": ["8.1", "8.3", "8.5", "8.6", "9.1", "9.2"] },
-    { "id": 8, "tasks": ["8.2", "8.4", "8.7", "8.8", "10.1", "10.2"] },
-    { "id": 9, "tasks": ["11.1"] },
-    { "id": 10, "tasks": ["11.2"] }
+    { "id": 1, "tasks": ["1.3", "2.1"] },
+    { "id": 2, "tasks": ["2.2", "2.3", "3.1"] },
+    { "id": 3, "tasks": ["3.2", "3.3"] },
+    { "id": 4, "tasks": ["3.4", "5.1", "5.3"] },
+    { "id": 5, "tasks": ["5.2", "5.4", "6.1"] },
+    { "id": 6, "tasks": ["6.2", "6.3"] },
+    { "id": 7, "tasks": ["8.1", "9.1", "9.2"] },
+    { "id": 8, "tasks": ["9.3", "9.4", "10.1"] },
+    { "id": 9, "tasks": ["9.5", "10.2"] },
+    { "id": 10, "tasks": ["11.1"] },
+    { "id": 11, "tasks": ["11.2"] }
   ]
 }
 ```

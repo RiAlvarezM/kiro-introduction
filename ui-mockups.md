@@ -16,8 +16,8 @@
 ```
 ┌────────────────────────────────────────────────────┐
 │                                                    │
-│            [Panama City skyline background]         │
-│                  [Clouds floating]                  │
+│            [Canal de Panamá background]             │
+│            [Agua, vegetación, cerros]              │
 │                                                    │
 │                                                    │
 │              ╔══════════════════════╗               │
@@ -47,7 +47,7 @@
 | Ghosty sprite | Center X, 45% from top | 32x32 px, idle animation loop |
 | Play instruction | Center X, 65% from top | Font: 16px, Color: #FFD700, blinking (toggle every 800ms) |
 | High Score | Center X, 78% from top | Font: 14px, Color: #AAAAAA |
-| Background | Full canvas | Panama City skyline, scrolling at idle speed (30 px/s) |
+| Background | Full canvas | Canal de Panamá (agua, vegetación, cerros), scrolling at idle speed (30 px/s) |
 | Dark bar | Bottom, full width | Height: 40px, Color: rgba(0, 0, 0, 0.8) |
 
 ### Interactions
@@ -90,7 +90,7 @@
 | High score (bottom) | Bottom-right, inside dark bar | Font: 14px, Color: #FFD700 |
 | Dark bar | Bottom, full width | Height: 40px, Color: rgba(0, 0, 0, 0.8) |
 | Ghosty | 20% from left, variable Y | 32x32 px, rotation based on velocity |
-| Pipes | Variable X, paired top/bottom | Width: 60px, Green fill, dark border |
+| Lock gates | Variable X, paired top/bottom | Width: 60px, Colored containers stacked, dark hull base |
 
 ### Score Display Rules
 
@@ -195,12 +195,14 @@ All screens share the same rendering pipeline:
 
 ```
 Layer 0: Sky background (#87CEEB fill)
-Layer 1: Panama City skyline (parallax at 30% speed)
-Layer 2: Pipes (green, with caps and borders)
-Layer 3: Clouds (multi-layer parallax, varied opacity)
-Layer 4: Ghosty sprite (with rotation and animation)
-Layer 5: HUD overlay (score, dark bar)
-Layer 6: State overlay (pause/game over screens)
+Layer 1: Hills / cerros lejanos (parallax at 15% speed)
+Layer 2: Vegetation / vegetación tropical (parallax at 25% speed)
+Layer 3: Canal water (#2E8B8B, parallax at 30% speed)
+Layer 4: Container ships / portacontenedores (obstacles)
+Layer 5: Clouds (multi-layer parallax, varied opacity)
+Layer 6: Ghosty sprite (with rotation and animation)
+Layer 7: HUD overlay (score, dark bar)
+Layer 8: State overlay (pause/game over screens)
 ```
 
 ---
@@ -209,7 +211,10 @@ Layer 6: State overlay (pause/game over screens)
 
 | Element | Color | Hex |
 |---------|-------|-----|
-| Sky | Light blue | #87CEEB |
+| Sky | Light blue (tropical) | #87CEEB |
+| Canal water | Teal / blue-green | #2E8B8B |
+| Hills | Dark green | #006400 |
+| Vegetation | Tropical green | #228B22 |
 | Title text | White | #FFFFFF |
 | Score text (large) | White with black stroke | #FFFFFF / #000000 |
 | High score | Gold | #FFD700 |
@@ -219,5 +224,9 @@ Layer 6: State overlay (pause/game over screens)
 | Dark bar background | Black, 80% opacity | rgba(0,0,0,0.8) |
 | Pause overlay | Black, 50% opacity | rgba(0,0,0,0.5) |
 | Game Over overlay | Black, 60% opacity | rgba(0,0,0,0.6) |
-| Pipes | Green | #228B22 |
-| Pipe border | Dark green | #145214 |
+| Container ship hull | Dark gray | #4A4A4A |
+| Container red | Red | #CC3333 |
+| Container blue | Blue | #3366CC |
+| Container green | Green | #33AA55 |
+| Container orange | Orange | #FF8C00 |
+| Container border | Dark | #333333 |

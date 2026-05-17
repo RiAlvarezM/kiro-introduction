@@ -2,7 +2,7 @@
 
 ## Resumen (Overview)
 
-Flappy Kiro es un juego side-scroller infinito estilo Flappy Bird implementado con HTML5 Canvas y JavaScript vanilla, sin dependencias externas. El jugador controla a un fantasmita ("Flappy") que debe navegar a través de pares de tuberías con dificultad progresiva. El juego presenta un fondo con una caricatura de la Ciudad de Panamá con efecto parallax, estilo visual anime/retro, y un sistema de audio con efectos de salto y game over.
+Flappy Kiro es un juego side-scroller infinito estilo Flappy Bird implementado con HTML5 Canvas y JavaScript vanilla, sin dependencias externas. El jugador controla a un fantasmita ("Flappy") que debe navegar a través de pares de barcos portacontenedores con dificultad progresiva. El juego presenta un fondo con una caricatura del área del Canal de Panamá con efecto parallax, estilo visual retro, y un sistema de audio con efectos de salto y game over. Los obstáculos tienen forma de portacontenedores con contenedores de colores apilados.
 
 El juego se ejecuta directamente en el navegador abriendo un archivo HTML, utiliza `requestAnimationFrame` para el game loop, y persiste el puntaje máximo en `localStorage`.
 
@@ -154,9 +154,9 @@ class Player {
 }
 ```
 
-### 3. PipeSystem (Sistema de Tuberías)
+### 3. PipeSystem (Sistema de Portacontenedores)
 
-Genera, desplaza y elimina pares de tuberías. Usa **object pooling** para evitar allocations durante gameplay.
+Genera, desplaza y elimina pares de portacontenedores. Usa **object pooling** para evitar allocations durante gameplay.
 
 ```javascript
 class PipeSystem {
@@ -170,8 +170,8 @@ class PipeSystem {
   
   // Properties
   pool: PipePool          // Pool de objetos reutilizables
-  activePipes: Pipe[]     // Tuberías actualmente en pantalla
-  lastPipeX: number       // Posición X de la última tubería generada
+  activePipes: Pipe[]     // Portacontenedores actualmente en pantalla
+  lastPipeX: number       // Posición X del último portacontenedores generado
   
   static PIPE_WIDTH: 60   // px
 }
@@ -180,9 +180,9 @@ interface Pipe {
   x: number
   gapCenterY: number
   gapSize: number
-  scored: boolean       // Si el jugador ya pasó esta tubería
-  topRect: Rect         // Hitbox tubería superior
-  bottomRect: Rect      // Hitbox tubería inferior
+  scored: boolean       // Si el jugador ya pasó este portacontenedores
+  topRect: Rect         // Hitbox portacontenedores superior
+  bottomRect: Rect      // Hitbox portacontenedores inferior
   active: boolean       // Si está en uso o disponible en el pool
 }
 ```
@@ -216,9 +216,9 @@ class DifficultySystem {
 }
 ```
 
-### 5. Background (Fondo de Ciudad de Panamá)
+### 5. Background (Fondo del Canal de Panamá)
 
-Renderiza el fondo con efecto parallax.
+Renderiza el fondo con efecto parallax representando el área del Canal de Panamá.
 
 ```javascript
 class Background {
@@ -230,7 +230,12 @@ class Background {
   // Properties
   scrollX: number       // Offset de desplazamiento actual
   
-  static PARALLAX_FACTOR: 0.3  // 30% de la velocidad de tuberías
+  // Layers
+  static SKY_COLOR: '#87CEEB'           // Cielo tropical
+  static HILLS_COLOR: '#006400'         // Cerros lejanos
+  static VEGETATION_COLOR: '#228B22'    // Vegetación tropical
+  static WATER_COLOR: '#2E8B8B'         // Agua del canal
+  static PARALLAX_FACTOR: 0.3           // 30% de la velocidad de portacontenedores
 }
 ```
 
@@ -249,8 +254,8 @@ class CloudSystem {
   clouds: Cloud[]
   
   static MIN_CLOUDS: 3
-  static MIN_SPEED_FACTOR: 0.1  // 10% velocidad tuberías
-  static MAX_SPEED_FACTOR: 0.5  // 50% velocidad tuberías
+  static MIN_SPEED_FACTOR: 0.1  // 10% velocidad portacontenedores
+  static MAX_SPEED_FACTOR: 0.5  // 50% velocidad portacontenedores
   static MIN_OPACITY: 0.4
   static MAX_OPACITY: 0.7
 }
@@ -260,7 +265,7 @@ interface Cloud {
   y: number
   width: number
   height: number
-  speedFactor: number   // Factor de velocidad relativo a tuberías
+  speedFactor: number   // Factor de velocidad relativo a portacontenedores
   opacity: number       // Entre 0.4 y 0.7
 }
 ```
@@ -445,9 +450,18 @@ const GAME_CONFIG = {
   SPACING_REDUCTION_INTERVAL: 10, // cada 10 puntos
   SPACING_REDUCTION_PX: 10,       // -10px
   
-  // Background
+  // Background - Canal de Panamá
   BG_PARALLAX_FACTOR: 0.3,
   SKY_COLOR: '#87CEEB',
+  HILLS_COLOR: '#006400',
+  VEGETATION_COLOR: '#228B22',
+  WATER_COLOR: '#2E8B8B',
+  
+  // Portacontenedores (obstáculos)
+  SHIP_HULL_COLOR: '#4A4A4A',
+  CONTAINER_COLORS: ['#CC3333', '#3366CC', '#33AA55', '#FF8C00'],
+  CONTAINER_BORDER_COLOR: '#333333',
+  CONTAINER_HEIGHT: 15,  // px por contenedor apilado
   
   // Clouds
   MIN_CLOUDS: 3,
@@ -709,30 +723,44 @@ class BatchRenderer {
 
 **Principios de batching:**
 
-1. **Agrupar por fillStyle/strokeStyle**: Todas las tuberías comparten el mismo estilo, se dibujan en secuencia sin cambiar `ctx.fillStyle` entre cada una
-2. **Pre-renderizar en OffscreenCanvas**: Los segmentos de tubería y las nubes se dibujan una vez en canvas offscreen y luego se copian con `drawImage()` (más rápido que redibujar formas complejas cada frame)
-3. **Minimizar cambios de estado**: El orden de renderizado (fondo → tuberías → nubes → player → HUD) ya agrupa elementos con estilos similares
+1. **Agrupar por fillStyle/strokeStyle**: Todos los portacontenedores comparten el mismo patrón de colores, se dibujan en secuencia
+2. **Pre-renderizar en OffscreenCanvas**: Los segmentos de portacontenedores y las nubes se dibujan una vez en canvas offscreen y luego se copian con `drawImage()` (más rápido que redibujar formas complejas cada frame)
+3. **Minimizar cambios de estado**: El orden de renderizado (fondo → portacontenedores → nubes → player → HUD) ya agrupa elementos con estilos similares
 4. **Evitar `save()`/`restore()` innecesarios**: Solo usar cuando se requiere transformación (rotación del sprite de Flappy)
 
 ```javascript
-// Ejemplo: pre-renderizado de tubería en offscreen canvas
-function createPipeCanvas(width, height, color, borderColor) {
+// Ejemplo: pre-renderizado de portacontenedores en offscreen canvas
+function createShipCanvas(width, height, hullColor, containerColors, borderColor) {
   const offscreen = document.createElement('canvas');
   offscreen.width = width;
   offscreen.height = height;
   const octx = offscreen.getContext('2d');
-  octx.fillStyle = color;
-  octx.fillRect(0, 0, width, height);
-  octx.strokeStyle = borderColor;
-  octx.lineWidth = 2;
-  octx.strokeRect(0, 0, width, height);
+  const containerH = 15;
+  const hullH = 10;
+  
+  // Dibujar contenedores apilados
+  let y = 0;
+  while (y < height - hullH) {
+    const color = containerColors[Math.floor(y / containerH) % containerColors.length];
+    octx.fillStyle = color;
+    octx.fillRect(0, y, width, containerH);
+    octx.strokeStyle = borderColor;
+    octx.lineWidth = 1;
+    octx.strokeRect(0, y, width, containerH);
+    y += containerH;
+  }
+  
+  // Dibujar casco del barco en la base
+  octx.fillStyle = hullColor;
+  octx.fillRect(0, height - hullH, width, hullH);
+  
   return offscreen; // Reutilizar con drawImage() cada frame
 }
 ```
 
 ### Gestión de Memoria: Object Pooling para Obstáculos
 
-Las tuberías se reciclan en lugar de crear/destruir objetos cada vez que salen de pantalla. Esto elimina la presión sobre el garbage collector y evita micro-stutters.
+Los portacontenedores se reciclan en lugar de crear/destruir objetos cada vez que salen de pantalla. Esto elimina la presión sobre el garbage collector y evita micro-stutters.
 
 ```javascript
 class ObjectPool {
@@ -749,7 +777,7 @@ class ObjectPool {
   active: Set<T>        // Objetos actualmente en uso
 }
 
-// Pool específico para tuberías
+// Pool específico para portacontenedores
 class PipePool extends ObjectPool<Pipe> {
   constructor() {
     super(() => ({
@@ -763,10 +791,10 @@ class PipePool extends ObjectPool<Pipe> {
     }), INITIAL_POOL_SIZE);
   }
   
-  // Reconfigura un pipe reciclado con nuevos valores
+  // Reconfigura un portacontenedores reciclado con nuevos valores
   spawn(x: number, gapCenterY: number, gapSize: number): Pipe
   
-  static INITIAL_POOL_SIZE: 10  // Pre-crear 10 pares de tuberías
+  static INITIAL_POOL_SIZE: 10  // Pre-crear 10 pares de portacontenedores
 }
 ```
 
@@ -778,13 +806,13 @@ stateDiagram-v2
     Pool --> Active: acquire() + spawn()
     Active --> Active: update() cada frame
     Active --> Pool: release() cuando x + width < 0
-    Pool --> Active: acquire() para nueva tubería
+    Pool --> Active: acquire() para nuevo portacontenedores
 ```
 
 **Reglas del pool:**
-1. Al inicio del juego, pre-crear `INITIAL_POOL_SIZE` (10) objetos de tubería
-2. Cuando una tubería sale de pantalla, llamar `release()` en vez de eliminarla del array
-3. Cuando se necesita una nueva tubería, llamar `acquire()` y reconfigurar con `spawn()`
+1. Al inicio del juego, pre-crear `INITIAL_POOL_SIZE` (10) objetos de portacontenedores
+2. Cuando un portacontenedores sale de pantalla, llamar `release()` en vez de eliminarlo del array
+3. Cuando se necesita un nuevo portacontenedores, llamar `acquire()` y reconfigurar con `spawn()`
 4. Si el pool está vacío (caso raro), crear un objeto nuevo dinámicamente
 5. Nunca reducir el pool — los objetos creados persisten toda la sesión
 
@@ -946,8 +974,8 @@ Los tests unitarios cubren:
 - **Transiciones de estado**: Cada transición válida produce el estado esperado
 - **Audio**: jump.wav se reproduce al saltar, game_over.wav al colisionar, silencio en pausa
 - **HUD**: Formato "Score: X" y "High: X" correcto
-- **Rendering**: Orden de capas correcto (cielo → ciudad → tuberías → nubes → Flappy → HUD)
-- **Pipe rendering**: Ancho de 60px, color verde, bordes oscuros
+- **Rendering**: Orden de capas correcto (cielo → cerros → vegetación → agua → portacontenedores → nubes → Flappy → HUD)
+- **Pipe rendering**: Ancho de 60px, contenedores de colores apilados, casco gris oscuro
 
 ### Edge Case Tests
 
